@@ -1,0 +1,300 @@
+<project name="Fibonacci_Continuous_Integration" default="run" basedir=".">
+    <description>   
+        Ant build sample for running 
+        - findbugs, 
+        - checkstyle, 
+        - cobertrua 
+        - junit
+    </description>
+
+     <!-- Change the paths to your individual installation directories -->
+    <property name="checkstyle.home.dir" value="C:\Users\212572604\Desktop\CI assignment tools\checkstyle-7.1.2-src\checkstyle-7.1.2" />
+    <property name="cobertura.home.dir" value="C:\Users\212572604\Desktop\CI assignment tools\cobertura-2.1.1-bin\cobertura-2.1.1" />
+    <property name="findbugs.home.dir" value="C:\Users\212572604\Desktop\CI assignment tools\findbugs-3.0.1" />
+	<property name="projectName" value="FibonacciUI" />
+    <property name="lib.dir" location="${basedir}/lib" />
+    <property name="src.dir" location="${basedir}/src" />
+    <property name="bin.dir" location="${basedir}/bin" />
+	<property name="jar.dir" location="${basedir}/jar" />
+    <property name="htm.dir" location="${basedir}/html" />
+    <property name="report.dir" location="${basedir}/report" />
+
+    <property name="report.checkstyle.dir" location="${report.dir}/checkstyle" />
+	<property name="src.test.dir" location="${src.dir}/test" />
+    <property name="report.junit.dir" location="${report.dir}/junit" />
+    <property name="report.findbugs.dir" location="${report.dir}/findbugs" />
+    <property name="report.cobertura.dir" location="${report.dir}/cobertura" />
+    
+    <property name="instrumented.dir" location="${basedir}/instrumented" />
+    <property name="report.temp.dir" location="${report.dir}/temp" />
+    <property name="cobertura.ser.file" location="${report.temp.dir}/cobertura.ser" />
+
+     <path id="run.classpath">
+        <pathelement path="${bin.dir}" />
+        <pathelement path="${basedir}/junit-4.12-javadoc.jar" />
+    </path>
+
+    <path id="cobertura.classpath">
+        <path refid="run.classpath" />
+        <fileset dir="${cobertura.home.dir}">
+            <include name="cobertura**.jar" />
+            <include name="lib/**/*.jar" />
+        </fileset>
+    </path>
+    <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+
+    <!-- -->
+    <target name="clean" description="Delete all result to start with a clean build.">
+        <delete dir="${report.junit.dir}" />
+        <delete dir="${report.findbugs.dir}" />
+        <delete dir="${report.cobertura.dir}" />
+        <delete dir="${report.checkstyles.dir}" />
+        <delete dir="${report.temp.dir}" />
+        <delete dir="${bin.dir}" />
+		<delete dir="${jar.dir}" />
+		<delete dir="${instrumented.dir}" />
+    </target>
+
+    <target name="prepare.report.dir" description="Prepares the reports folder">
+        <copy todir="${report.dir}">
+            <fileset dir="${htm.dir}">
+                <include name="*.htm" />
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- -->
+    <target name="findbugs"
+            depends="compile"
+            description="Run code analysis over code to check for problems."
+    >
+        <!-- Fail this target if FindBugs is not installed. -->
+        <available file="${findbugs.home.dir}/lib/findbugs.jar" property="findbugs.available" />
+        <fail unless="findbugs.available"
+              message="Error: FINDBUGS_HOME not set or findbugs.jar not found."
+        />
+        <taskdef name="findbugs"
+                 classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+                 classpath="${findbugs.home.dir}/lib/findbugs-ant.jar"
+        />
+
+        <!-- Run FindBugs. -->
+        <mkdir dir="${report.findbugs.dir}" />
+        <findbugs home="${findbugs.home.dir}"
+                  workHard="true"
+                  output="xml:withMessages"
+                  outputFile="${report.findbugs.dir}/findbugs.xml"
+        >
+            <class location="${bin.dir}" />
+            <auxClasspath>
+                <fileset file="${basedir}/junit-4.12.jar" />
+            </auxClasspath>
+        </findbugs>
+    </target>
+
+    
+
+    <!-- -->
+    <target name="compile" depends="clean" description="Compile the entire project.">
+        <mkdir dir="${bin.dir}" />
+        <javac debug="true"
+               srcdir="${src.dir}"
+               destdir="${bin.dir}"
+               classpathref="run.classpath"
+        >
+<!--		<exclude name="test/**.java" /> -->
+		</javac>
+    </target>
+
+	
+	<target name="run1" depends="compile" description="run the program">
+  <!-- You can use exec here, depending on your needs -->
+  <java classname="FibonacciUI"
+    classpathref="run.classpath" >
+   <!-- <arg line="${args}"/> -->
+  </java>
+</target>
+
+    <target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		
+	</target>
+
+<target name="jar" depends="compile" description="package, output to JAR">
+
+		<!-- Create the distribution directory -->
+		<mkdir dir="${jar.dir}" />
+
+		<!-- Put everything in ${build} into the {$projectName}-${DSTAMP}.jar file -->
+		<jar jarfile="${jar.dir}/${projectName}-${DSTAMP}.jar"  >
+		    <manifest>
+			<!-- create an executable Jar -->
+			<attribute name="Main-Class" value="FibonacciUI" />
+		    </manifest>
+		</jar>
+	</target>
+
+
+<!--
+<target name="input-runargs" unless="args" description="prompts for command line arguments if necessary">
+  <input addProperty="args" message="Type the desired command line arguments:"/>
+</target>
+-->
+
+    <!-- -->
+    <target name="cobertura.instrument"
+            depends="compile"
+            description="Instrument the project for code coverage."
+    >
+        <mkdir dir="${report.temp.dir}" />
+        <cobertura-instrument todir="${instrumented.dir}" datafile="${cobertura.ser.file}">
+            <ignore regex="org.apache.log4j.*" />
+            <fileset dir="${bin.dir}">
+                <include name="**/*.class" />
+                <exclude name="Test*.class" /> 
+				<exclude name="FibonacciUI.class" /> 
+            </fileset>
+        </cobertura-instrument>
+    </target>
+
+<!-- -->
+    <target name="junit"
+            depends="clean, compile, cobertura.instrument"
+            description="Run all junit test cases."
+    >
+        <mkdir dir="${report.cobertura.dir}" />
+        <mkdir dir="${report.temp.dir}" />
+
+        <junit printsummary="yes" fork="yes" haltonfailure="no">
+
+            <!-- Specify the name of the coverage data file to use.
+                 The value specified below is the default.    -->
+            <sysproperty key="net.sourceforge.cobertura.datafile" 
+                file="${cobertura.ser.file}" />
+
+            <!-- Note the classpath order: instrumented classes are before 
+                 the original (uninstrumented) classes.  This is important. -->
+            <classpath location="${instrumented.dir}" />
+             <!-- <classpath location="${bin.dir}" /> -->
+            <classpath location="${basedir}/junit-4.12.jar}" />
+
+            <!-- The instrumented classes reference classes used by the
+                 Cobertura runtime, so Cobertura and its dependencies
+                 must be on your classpath. -->
+            <classpath refid="cobertura.classpath" />
+
+            <formatter type="plain" />
+            <formatter type="xml" />
+
+            <batchtest todir="${report.temp.dir}">
+                <fileset dir="${src.test.dir}">
+                    <include name="**/*Test*.java" />
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+ <!-- -->
+    <target name="report.junit" depends="junit" 
+        description="Create a report for the test result.">
+        <delete dir="${report.junit.dir}" />
+        <mkdir dir="${report.junit.dir}" />
+        <junitreport todir="${report.junit.dir}">
+            <fileset dir="${report.temp.dir}">
+                <include name="*.xml" />
+            </fileset>
+            <report format="frames" todir="${report.junit.dir}" />
+        </junitreport>
+    </target>
+   
+   
+   
+    <!-- -->
+    <target name="report.findbugs" description="Generate a report on error analysis.">
+        <xslt in="${report.findbugs.dir}/findbugs.xml"
+              style="${findbugs.home.dir}/src/xsl/fancy.xsl"
+              out="${report.findbugs.dir}/findbugs-default.html"
+        />
+    </target>
+
+    <!-- -->
+    <target name="report.cobertura"
+            description="Generate an HTML report on Cobertura."
+    >
+        <cobertura-report format="xml"
+                          datafile="${cobertura.ser.file}"
+                          destdir="${report.cobertura.dir}"
+        >
+            <fileset dir="${src.test.dir}">
+                <include name="**/*.java" />
+            </fileset>
+        </cobertura-report>
+		<cobertura-report format="html"
+                          datafile="${cobertura.ser.file}"
+                          destdir="${report.cobertura.dir}"
+        >
+            <fileset dir="${src.test.dir}">
+                <include name="**/*.java" />
+            </fileset>
+        </cobertura-report>
+    </target>
+
+
+    <!-- -->
+    <target name="report.checkstyle" 
+        description="Generate a report of code convention violations.">
+	<!--	<taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpathref="checkstyle.lib.path"/> -->
+        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties"
+                 classpath="${checkstyle.home.dir}/checkstyle-6.13-all.jar"
+        />
+
+        <!-- run verification of installation-->
+        <available file="${checkstyle.home.dir}/checkstyle-6.13-all.jar"
+                   property="checkstyle.available"
+        />
+        <fail unless="checkstyle.available"
+              message="Error: CHECKSTYLE_HOME not set or checkstyle-all-5.0.jar not found."
+        />
+        <mkdir dir="${report.checkstyle.dir}" />
+
+        <!-- run analysis-->
+        <checkstyle config="${checkstyle.home.dir}/google_checks.xml"
+                    failureProperty="checkstyle.failure"
+                    failOnViolation="false"
+        >
+            <formatter type="xml" tofile="${report.checkstyle.dir}/checkstyle_report.xml" />
+            <fileset dir="${src.dir}" includes="*.java" />
+        </checkstyle>
+
+        <style in="${report.checkstyle.dir}/checkstyle_report.xml"
+               out="${report.checkstyle.dir}/checkstyle_report.html"
+               style="${checkstyle.home.dir}/checkstyle-noframes.xsl"
+        />
+    </target>
+
+    <!-- -->
+    <target name="clean.temp" description="Delete all temporary files and folders.">
+        <delete dir="${instrumented.dir}" />
+        <delete dir="${report.temp.dir}" />
+    </target>
+
+    <!-- -->
+    <target name="run"
+            description="Run the build"
+            depends="clean,
+				init,
+                prepare.report.dir,   
+                compile,
+                cobertura.instrument, 
+                junit,
+				report.checkstyle,
+                report.junit,
+                findbugs, 
+                report.findbugs, 
+                report.cobertura,
+				jar"
+    >
+    </target>
+
+</project>
