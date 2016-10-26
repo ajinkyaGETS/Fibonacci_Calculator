@@ -1,7 +1,7 @@
 public class Fibonacci
 {
 	public static long calculate(long i){	
-		if (i < 2)
+		if (i <= 2)
 		  return i;
 		
 		long a = 0;
