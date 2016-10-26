@@ -31,7 +31,7 @@
 
      <path id="run.classpath">
         <pathelement path="${bin.dir}" />
-        <pathelement path="${basedir}/junit-4.12-javadoc.jar" />
+        <pathelement path="${basedir}/junit-4.12.jar" />
     </path>
 
     <path id="cobertura.classpath">
