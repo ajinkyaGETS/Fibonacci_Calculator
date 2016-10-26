@@ -10,7 +10,7 @@ public class FibonacciUI
 * 
 * @param args
 * Command-line arguments (not used)
-* Manisha: Introduced error by removing curly brace.
+* Manisha: Introduced error by removing curly brace.(correction)
 */
  public static void main(String[] args)
  {
@@ -28,7 +28,7 @@ public class FibonacciUI
 					keepRunning = false;
 					continue;
 			}
-			if (inputString.contains("q"))	// error
+			if (inputString.contains("q")){ //error corrected
 					keepRunning = false;
 					continue;
 			} 
