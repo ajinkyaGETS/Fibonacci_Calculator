@@ -1,15 +1,16 @@
-/* Anantha: Introduced defect by removing ";" */
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class FibonacciUI 
 {
+
 /**
 * Main entry point for the UI.
 * 
 * @param args
 * Command-line arguments (not used)
+* Anantha: Removed defect by rmoving comment from the begining
 */
  public static void main(String[] args)
  {

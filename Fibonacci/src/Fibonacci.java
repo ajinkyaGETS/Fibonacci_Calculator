@@ -1,6 +1,6 @@
 public class Fibonacci
 {
-    public static long calculate(long i){	
+	public static long calculate(long i){	
 		if (i < 2)
 		  return i;
 		
@@ -8,11 +8,11 @@ public class Fibonacci
 		long b = 1;
 		long fib = 1;
 			
-		for(long x = 2; x <= i; x++)	{
-                   fib = a + b;
-		   a = b;
-		   b = fib;
-                }
+		for (long x = 2; x <= i; x++){
+			fib = a + b;
+			a = b;
+			b = fib;
+		}
 		return fib;
-     }
+	}
 }
