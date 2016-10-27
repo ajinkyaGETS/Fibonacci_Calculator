@@ -1,18 +1,15 @@
-public class Fibonacci
-{
-	public static long calculate(long i){	
-		if (i <= 2)
-		  return i;
-		
-		long a = 0;
-		long b = 1;
-		long fib = 1;
-			
-		for (long x = 2; x <= i; x++){
-			fib = a + b;
-			a = b;
-			b = fib;
-		}
-		return fib;
-	}
+public class Fibonacci{
+ public static long calculate(long i){	
+  if (i < 2)  // Ajinkya_created_tried to reduce static warnings in the code
+   return i;
+  long a = 0;
+  long b = 1;
+  long fib = 1;
+  for (long x = 2; x <= i; x++){
+   fib = a + b;
+   a = b;
+   b = fib;
+  }
+ return fib;
+ }
 }
