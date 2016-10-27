@@ -1,6 +1,6 @@
 public class Fibonacci{
  public static long calculate(long i){	
-  if (i < 2);  // Ajinkya_tried to reduce static warnings in the code
+  if (i < 2;  // Ajinkya_tried to reduce static warnings in the code
    return i;
   long a = 0;
   long b = 1;
